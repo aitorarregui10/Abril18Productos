@@ -1,5 +1,5 @@
 package com.softtek.repo;
-/*
+
 import com.softtek.modelo.Producto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,31 +42,52 @@ public class ProductoRepo extends Conexion implements IProductoRepo {
     @Override
     public Producto obtenerUnProd(int product_id) throws SQLException, ClassNotFoundException {
         abrirConexion();
+        Producto p = null;
         String query = "SELECT * FROM products WHERE product_id=?;";
         PreparedStatement ps = miConexion.prepareStatement(query);
         ps.setInt(1,product_id);
         ResultSet rs = ps.executeQuery();
 
         if (rs.next()){
-            int id = rs.getInt("product_id");
-            String nombre = rs.getString("product_name");
-            double precio = rs.getDouble("unit_price");
-            int stock = rs.getInt("units_in_stock");
-            int categoria = rs.getInt("category_id");
-            return new Producto(id, nombre, precio, stock, categoria);
+            p = new Producto(
+                rs.getInt("product_id"),
+                rs.getString("product_name"),
+                rs.getDouble("unit_price"),
+                rs.getInt("units_in_stock"),
+                rs.getInt("category_id")
+            );
         }
-        return new Producto(int product_id);
+        return p;
     }
 
     @Override
-    public Producto crearProducto(int product_id, int stock) throws SQLException, ClassNotFoundException {
+    public Producto crearProducto(Producto p) throws SQLException, ClassNotFoundException{
+        abrirConexion();
+        String sql= "INSERT INTO products (product_id, product_name,unit_price,units_in_stock,category_id) VALUES (?,?,?,?,?)";
+        PreparedStatement ps = miConexion.prepareStatement(sql);
+
+        ps.setInt(1,p.getProduct_id());
+        ps.setString(2,p.getNombreProducto());
+        ps.setDouble(3,p.getPrecioUnitario());
+        ps.setInt(4,p.getUnidadesStock());
+        ps.setInt(5,p.getCategoria());
+
+        if (ps.executeUpdate()>0){
+            return p;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Producto modificarProducto(Producto p) throws SQLException, ClassNotFoundException {
         abrirConexion();
         String query = "UPDATE products SET units_in_stock=? WHERE product_id=?";
         PreparedStatement ps = miConexion.prepareStatement(query);
-        ps.setInt(1,stock);
-        ps.setInt(2,product_id);
+        ps.setInt(1,p.getUnidadesStock());
+        ps.setInt(2,p.getProduct_id());
         ps.executeUpdate();
-        return new Producto();
+        return p;
     }
 
     @Override
@@ -78,4 +99,3 @@ public class ProductoRepo extends Conexion implements IProductoRepo {
         ps.executeUpdate();
     }
 }
-*/
